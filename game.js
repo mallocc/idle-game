@@ -10,47 +10,6 @@ let rolls = 0;
 
 const averageDieValue = 3.5;
 
-
-// Initialize the chart
-const ctx = document.getElementById('scoreChart').getContext('2d');
-const scoreChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [], // Roll numbers
-        datasets: [{
-            label: 'Score',
-            data: [], // Scores
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-            fill: false
-        }]
-    },
-    options: {
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            },
-            y: {
-                title: {
-                    display: true,
-                    text: 'Score'
-                }
-            }
-        }
-    }
-});
-
-function updateChart(rollNumber, score) {
-    const currentTime = new Date().toLocaleTimeString();
-    scoreChart.data.labels.push(currentTime);
-    scoreChart.data.datasets[0].data.push(score);
-    scoreChart.update();
-}
-
-
 // a autoroller consists of a 16ms slot within the max 60fps frame rate
 // so initialising an array of 60 elements to store the autorollers counts at each frame
 const autoRollers = [];
@@ -247,11 +206,6 @@ function gameLoop() {
         }
 
     }, 16);
-
-    // // update the chart every second
-    // setInterval(() => {
-    //     updateChart(rolls, totalScore);
-    // }, 1000);
 }
 
 // initial setup
