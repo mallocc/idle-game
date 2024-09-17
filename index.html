@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎲 ParaDice</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <h1>🎲 ParaDice</h1>
+    <h2>Total Score: <span id="total-score">0</span></h2>
+    <h3>Rolls: <span id="rolls">0</span></h3>
+    <p>
+      <button onclick="rollDice()">Roll Dice</button>
+      &#x2192;
+      <!-- Left arrow emoji -->
+      Score:
+      <span id="score">0</span>
+    </p>
+    <table id="shop" style="display: none">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Price</th>
+          <th></th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Dice</td>
+          <td>
+            <span id="die-price-x1"></span>
+          </td>
+          <td>
+            <button onclick="buyDie()">Buy x1</button>
+          </td>
+          <td>
+            <span id="die-count">0</span>
+          </td>
+        </tr>
+        <tr id="auto-roller-row" style="display: none">
+          <td>Auto Roller</td>
+          <td>
+            <span id="auto-roll-price-x1"></span>
+          </td>
+          <td>
+            <button onclick="buyAutoRoll()">Buy x1</button>
+          </td>
+          <td>
+            <span id="auto-roll-count">0</span>
+          </td>
+        </tr>
+        <tr id="auto-die-buyer-row" style="display: none">
+          <td>Auto Die Buyer</td>
+          <td>
+            <span id="auto-die-buyer-price-x1"></span>
+          </td>
+          <td>
+            <button onclick="buyAutoDieBuyer()">Buy x1</button>
+          </td>
+          <td>
+            <span id="auto-die-buyer-count">0</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- <canvas id="scoreChart" width="400" height="200"></canvas> -->
+
+    <script>
+      // Cache-busting mechanism
+      const script = document.createElement("script");
+      script.src = `game.js?t=${new Date().getTime()}`;
+      document.body.appendChild(script);
+
+      const socket = new WebSocket("ws://localhost:8081");
+      socket.onmessage = function (event) {
+        if (event.data === "reload") {
+          location.reload();
+        }
+      };
+    </script>
+  </body>
+</html>
