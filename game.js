@@ -284,8 +284,14 @@ let board = [
 ];
 
 let boardLastRollValues = [
-    [0]
+    [{
+        value: 0,
+        isCrit: false
+    }]
 ];
+
+let columnSums = [0];
+let rowSums = [0];
 
 function formatNumber(number) {
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -387,16 +393,37 @@ function displayDiceBoardTable() {
                     cell.innerText = '?';
                 }
                 else {
-                    let dieValue = boardLastRollValues[i][j] || '?';
+                    let dieValue = boardLastRollValues[i][j].value || '?';
                     let dieType = board[i][j];
                     let dieName = unlockables.find(u => u.dieValue === dieType)?.name || '';
-                    cell.innerHTML = `<div style="position: relative; height: 100%; width: 100%; padding-bottom: 10px;">
+                    let cellStyle = boardLastRollValues[i][j].isCrit ? 'border: 2px solid green;' : '';
+                    cell.innerHTML = `<div style="position: relative; height: 100%; width: 100%; padding-bottom: 10px; ${cellStyle}">
                                         <div style="position: absolute; top: 0; left: 0; font-size: small; margin-bottom: 5px;">${dieName}</div>
                                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold;">${dieValue}</div>
                                       </div>`;
                 }
             }
         }
+        // // add row sum if not in edit mode
+        // if (!editMode && board[i].length > 1) {
+        //     let cell = row.insertCell();
+        //     cell.innerText = rowSums[i];
+        // }
+    }
+    // // add column sums if not in edit mode
+    // if (!editMode && board.length > 1) {
+    //     let row = table.insertRow();
+    //     for (let j = 0; j < board[0].length; j++) {
+    //         let cell = row.insertCell();
+    //         cell.innerText = columnSums[j];
+    //     }
+    // }
+
+    // add total sum if not in edit mode
+    if (!editMode && board.length > 1 && board[0].length > 1) {
+        let row = table.insertRow();
+        let cell = row.insertCell();
+        cell.innerText = processBoardRoll().total;
     }
 }
 
@@ -433,22 +460,37 @@ function processBoardRoll() {
 
     let total = 0;
 
-    // sum up all the dice values
+    // sum up all the dice values for rows and columns separately
     for (let i = 0; i < board.length; i++) {
+        rowSums[i] = 0;
         for (let j = 0; j < board[i].length; j++) {
-            let dieValue = boardLastRollValues[i][j];
-            total += dieValue;
+            let dieValue = boardLastRollValues[i][j].value;
+            rowSums[i] += dieValue;
         }
     }
 
+    for (let j = 0; j < board[0].length; j++) {
+        columnSums[j] = 0;
+        for (let i = 0; i < board.length; i++) {
+            let dieValue = boardLastRollValues[i][j].value;
+            columnSums[j] += dieValue;
+        }
+    }
+
+    // sum up all the dice values
+    total = rowSums.reduce((acc, val) => acc + val, 0);
+
+    // reset crits
+    boardLastRollValues.flat().forEach(cell => cell.isCrit = false);
 
     let criticals = 0;
     // check if if a row has all the same roll value
     for (let i = 0; i < board.length; i++) {
         let row = boardLastRollValues[i];
-        let nonEmptyCount = row.filter(value => value !== 0).length;
-        if (nonEmptyCount > 1 && row.every(value => value === row[0] || value === 0)) {
+        let nonEmptyCount = row.filter(value => value.value !== 0).length;
+        if (nonEmptyCount > 1 && row.every(value => value.value === row[0].value || value.value === 0)) {
             criticals++;
+            row.forEach(cell => cell.isCrit = true);
         }
     }
 
@@ -456,9 +498,10 @@ function processBoardRoll() {
     // check if if a column has all the same roll value
     for (let j = 0; j < board[0].length; j++) {
         let column = boardLastRollValues.map(row => row[j]);
-        let nonEmptyCount = column.filter(value => value !== 0).length;
-        if (nonEmptyCount > 1 && column.every(value => value === column[0] || value === 0)) {
+        let nonEmptyCount = column.filter(value => value.value !== 0).length;
+        if (nonEmptyCount > 1 && column.every(value => value.value === column[0].value || value.value === 0)) {
             criticals++;
+            column.forEach(cell => cell.isCrit = true);
         }
     }
 
@@ -472,23 +515,25 @@ function processBoardRoll() {
             diagonal2.push(boardLastRollValues[i][board.length - i - 1]);
         }
 
-        let nonEmptyCount = diagonal1.filter(value => value !== 0).length;
-        if (nonEmptyCount > 1 && diagonal1.every(value => value === diagonal1[0] || value === 0)) {
-            criticals += 1;
+        let nonEmptyCount = diagonal1.filter(value => value.value !== 0).length;
+        if (nonEmptyCount > 1 && diagonal1.every(value => value.value === diagonal1[0].value || value.value === 0)) {
+            criticals++;
+            diagonal1.forEach(cell => cell.isCrit = true);
         }
 
-        nonEmptyCount = diagonal2.filter(value => value !== 0).length;
-        if (nonEmptyCount > 1 && diagonal2.every(value => value === diagonal2[0] || value === 0)) {
-            criticals += 1;
+        nonEmptyCount = diagonal2.filter(value => value.value !== 0).length;
+        if (nonEmptyCount > 1 && diagonal2.every(value => value.value === diagonal2[0].value || value.value === 0)) {
+            criticals++;
+            diagonal2.forEach(cell => cell.isCrit = true);
         }
 
         // if all the dice are the same, double the total
-        nonEmptyCount = boardLastRollValues.flat().filter(value => value !== 0).length;
-        if (nonEmptyCount > 1 && boardLastRollValues.flat().every(value => value === boardLastRollValues[0][0] || value === 0)) {
+        nonEmptyCount = boardLastRollValues.flat().filter(value => value.value !== 0).length;
+        if (nonEmptyCount > 1 && boardLastRollValues.flat().every(value => value.value === boardLastRollValues[0][0].value || value.value === 0)) {
             total *= 10;
+            boardLastRollValues.flat().forEach(cell => cell.isCrit = true);
         }
     }
-
 
     return {
         total: total,
@@ -536,7 +581,7 @@ function rollDice() {
             if (dieUnlockable && Math.random() < dieUnlockable.doubleChance) {
                 dieValue *= 2;
             }
-            boardLastRollValues[i][j] = dieValue;
+            boardLastRollValues[i][j].value = dieValue;
         }
     }
 
@@ -559,7 +604,8 @@ function editModeToggle() {
 
 function addRow() {
     board.push(new Array(board[0].length).fill(6));
-    boardLastRollValues.push(new Array(board[0].length).fill(0));
+    boardLastRollValues.push(new Array(board[0].length).fill({ value: 0, isCrit: false }));
+    rowSums.push(0);
     updateScore(currentScore);
     displayDiceBoardTable();
 }
@@ -567,8 +613,9 @@ function addRow() {
 function addColumn() {
     for (let i = 0; i < board.length; i++) {
         board[i].push(6);
-        boardLastRollValues[i].push(0);
+        boardLastRollValues[i].push({ value: 0, isCrit: false });
     }
+    columnSums.push(0);
     updateScore(currentScore);
     displayDiceBoardTable();
 }
