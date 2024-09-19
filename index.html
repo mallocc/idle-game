@@ -9,40 +9,29 @@
     <h1>🎲 ParaDice</h1>
     <h2>Score: <span id="score">0</span></h2>
     <p>
-      <button onclick="rollDice()">Roll Dice</button>
-      <button onclick="rollDice10()" style="display: inline">Roll Dice x10</button>
-      <button onclick="rollDice100()" style="display: inline">Roll Dice x100</button>
+      <button onclick="rollDiceButton()">Roll Dice</button>
+      <button onclick="rollDice10()" style="display: inline">
+        Roll Dice x10
+      </button>
+      <button onclick="rollDice100()" style="display: inline">
+        Roll Dice x100
+      </button>
+    </p>
+    <h2 id="bonus-multiplier" style="display: none"></h2>
+    <h4 id="multiplier" style="display: none"></h4>
+    <h4 id="critical-multiplier" style="display: none"></h4>
+    <p>
       <button id="edit-button" onclick="editModeToggle()" style="display: none">
         Edit
       </button>
-      <button
-        id="buy-column-button"
-        onclick="buyColumn()"
-        style="display: none"
-      >
-        Buy Column
-      </button>
-      <button id="buy-row-button" onclick="buyRow()" style="display: none">
-        Buy Row
-      </button>
     </p>
-    <p>
-      <button id="buy-d6" onclick="buyD(6)" style="display: none">
-        Buy D6
-      </button>
-      <button id="buy-d8" onclick="buyD(8)" style="display: none">
-        Buy D8
-      </button>
-      <button id="buy-d10" onclick="buyD(10)" style="display: none">
-        Buy D10
-      </button>
-      <button id="buy-d12" onclick="buyD(12)" style="display: none">
-        Buy D12
-      </button>
-      <button id="buy-d20" onclick="buyD(20)" style="display: none">
-        Buy D20
-      </button>
-    </p>
+
+    <table id="diceBoardTable" class="table"></table>
+
+    <div id="shop" style="display: none">
+      <h2>Shop</h2>
+      <table id="shopTable" class="table"></table>
+    </div>
 
     <style>
       table {
@@ -69,7 +58,6 @@
         background-color: #ddd;
       }
     </style>
-    <table id="diceBoardTable" class="table"></table>
     <script src="./game.js"></script>
     <!-- <script>
       // Cache-busting mechanism
